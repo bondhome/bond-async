@@ -5,6 +5,7 @@ from aiohttp import ClientSession, ClientTimeout
 from aioresponses import CallbackResult, aioresponses
 
 from bond_async import Action, Bond, Direction
+from bond_async.bond_type import BondType
 
 
 @pytest.fixture(name="bond")
@@ -32,6 +33,17 @@ async def test_version(bond: Bond):
         response.get("http://test-host/v2/sys/version", payload={"some": "version"})
         actual = await bond.version()
         assert actual == {"some": "version"}
+
+
+@pytest.mark.asyncio
+async def test_bond_type(bond: Bond):
+    """Tests version API."""
+    with aioresponses() as response:
+        response.get(
+            "http://test-host/v2/sys/version", payload={"bondid": "KSMJWCE12345"}
+        )
+        actual = await bond.bond_type()
+        assert actual == BondType.SBB_CEILING_FAN
 
 
 @pytest.mark.asyncio

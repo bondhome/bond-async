@@ -6,6 +6,8 @@ from xmlrpc.client import Boolean
 from aiohttp import ClientSession, ClientTimeout
 from aiohttp.client_exceptions import ServerDisconnectedError, ClientOSError
 
+from bond_async.bond_type import BondType
+
 from .action import Action
 
 
@@ -28,8 +30,13 @@ class Bond:
         self._session = session
 
     async def version(self) -> dict:
-        """Return the version of hub/bridge reported by API."""
+        """Return the version of Bond reported by API."""
         return await self.__get("/v2/sys/version")
+
+    async def bond_type(self) -> BondType:
+        """Return the BondType based on the serial number reported by API."""
+        version = await self.version()
+        return BondType.from_serial(version["bondid"])
 
     async def token(self) -> dict:
         """Return the token after power rest or proof of ownership event."""
@@ -42,7 +49,9 @@ class Bond:
     async def devices(self) -> List[str]:
         """Return the list of available device IDs reported by API."""
         json = await self.__get("/v2/devices")
-        return [key for key in json if not key.startswith("_") and type(json[key]) is dict]
+        return [
+            key for key in json if not key.startswith("_") and type(json[key]) is dict
+        ]
 
     async def device(self, device_id: str) -> dict:
         """Return main device metadata reported by API."""
@@ -86,16 +95,18 @@ class Bond:
                     response.raise_for_status()
 
             await self.__call(put)
-            
+
     async def supports_groups(self) -> Boolean:
         """Return 'True' if the Bond supports the Groups feature."""
         json = await self.__get("/v2/")
-        return "groups" in json 
+        return "groups" in json
 
     async def groups(self) -> List[str]:
         """Return the list of available group IDs reported by API."""
         json = await self.__get("/v2/groups")
-        return [key for key in json if not key.startswith("_") and type(json[key]) is dict]
+        return [
+            key for key in json if not key.startswith("_") and type(json[key]) is dict
+        ]
 
     async def group(self, group_id: str) -> dict:
         """Return main group metadata reported by API."""

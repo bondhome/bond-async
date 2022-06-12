@@ -20,19 +20,20 @@ async def test_groups_supported(bond: Bond):
         response.get(
             "http://test-host/v2/",
             payload={
-                    "_":"b7e976b1",
-                    "__":"00000000",
-                    "devices":{"_":"0b64ba79"},
-                    "signal":{"_":"00000000"},
-                    "groups":{"_":"71ce683b"},
-                    "sys":{"_":"89858d62"},
-                    "api":{"_":"d00c7b8f"},
-                    "bridge":{"_":"df239de9"},
-                    "token":{"_":"aa72441a"}
-                },
+                "_": "b7e976b1",
+                "__": "00000000",
+                "devices": {"_": "0b64ba79"},
+                "signal": {"_": "00000000"},
+                "groups": {"_": "71ce683b"},
+                "sys": {"_": "89858d62"},
+                "api": {"_": "d00c7b8f"},
+                "bridge": {"_": "df239de9"},
+                "token": {"_": "aa72441a"},
+            },
         )
         actual = await bond.supports_groups()
         assert actual == True
+
 
 @pytest.mark.asyncio
 async def test_groups_unsupported(bond: Bond):
@@ -41,15 +42,15 @@ async def test_groups_unsupported(bond: Bond):
         response.get(
             "http://test-host/v2/",
             payload={
-                    "_":"b7e976b1",
-                    "__":"00000000",
-                    "devices":{"_":"0b64ba79"},
-                    "signal":{"_":"00000000"},
-                    "sys":{"_":"89858d62"},
-                    "api":{"_":"d00c7b8f"},
-                    "bridge":{"_":"df239de9"},
-                    "token":{"_":"aa72441a"}
-                },
+                "_": "b7e976b1",
+                "__": "00000000",
+                "devices": {"_": "0b64ba79"},
+                "signal": {"_": "00000000"},
+                "sys": {"_": "89858d62"},
+                "api": {"_": "d00c7b8f"},
+                "bridge": {"_": "df239de9"},
+                "token": {"_": "aa72441a"},
+            },
         )
         actual = await bond.supports_groups()
         assert actual == False
@@ -402,7 +403,9 @@ async def test_set_direction_forward(bond: Bond):
             "http://test-host/v2/groups/test-group-id/actions/SetDirection",
             callback=callback,
         )
-        await bond.group_action("test-group-id", Action.set_direction(Direction.FORWARD))
+        await bond.group_action(
+            "test-group-id", Action.set_direction(Direction.FORWARD)
+        )
 
 
 @pytest.mark.asyncio
@@ -418,7 +421,9 @@ async def test_set_direction_reverse(bond: Bond):
             "http://test-host/v2/groups/test-group-id/actions/SetDirection",
             callback=callback,
         )
-        await bond.group_action("test-group-id", Action.set_direction(Direction.REVERSE))
+        await bond.group_action(
+            "test-group-id", Action.set_direction(Direction.REVERSE)
+        )
 
 
 @pytest.mark.asyncio
