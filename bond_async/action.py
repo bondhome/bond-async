@@ -115,9 +115,9 @@ class Action:
     def __init__(self, name: str, argument: Any = None):
         self._name = name
         if self._name == Action.SET_STATE_BELIEF:
-            self._argument = {} if not argument else argument
+            self._argument = {} if argument is None else argument
         else:
-            self._argument = {} if not argument else {"argument": argument}
+            self._argument = {} if argument is None else {"argument": argument}
 
     def __eq__(self, other: "Action"):
         return self.name == other.name and self.argument == other.argument
