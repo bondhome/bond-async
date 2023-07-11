@@ -4,7 +4,7 @@ import pytest
 from aiohttp import ClientSession, ClientTimeout
 from aioresponses import CallbackResult, aioresponses
 
-from bond_async import Action, Bond, Direction
+from bond_async import Action, Bond, Direction, RequestorUUID
 from bond_async.bond_type import BondType
 
 
@@ -24,6 +24,54 @@ async def test_optional_overrides():
             response.get("http://test-host/v2/sys/version", payload={"some": "version"})
             actual = await bond.version()
             assert actual == {"some": "version"}
+
+
+@pytest.mark.asyncio
+async def test_illegal_requestor_uuid():
+    """Tests using illegal requestor UUID."""
+    with pytest.raises(ValueError):
+        Bond("test-host", "test-token", requestor_uuid=RequestorUUID.TEST)
+
+
+@pytest.mark.asyncio
+async def test_legal_requestor_uuid():
+    """Tests using legal requestor UUID."""
+    bond = Bond("test-host", "test-token", requestor_uuid=RequestorUUID.ANONYMOUS)
+    assert bond._requestor_uuid == RequestorUUID.ANONYMOUS
+
+
+@pytest.mark.asyncio
+async def test_create_message_id():
+    bond = Bond("test-host", "test-token", requestor_uuid=RequestorUUID.ANONYMOUS)
+    message_id = bond._Bond__create_message_id()
+    session_id = bond._session_uuid
+    assert message_id[:2] == "ff"
+    assert message_id[2:6] == session_id
+    assert len(message_id) == 16
+
+    # a new call should generate a new message id, but the requestor uuid and session id should be the same
+    new_message_id = bond._Bond__create_message_id()
+    assert new_message_id[:2] == "ff"
+    assert new_message_id[2:6] == session_id
+    assert len(new_message_id) == 16
+    assert new_message_id != message_id
+
+
+@pytest.mark.asyncio
+async def test_msg_id_in_request_header(bond: Bond):
+    """Tests that the message id is in the request header."""
+    with aioresponses() as response:
+        response.get(
+            "http://test-host/v2/sys/version",
+            payload={"some": "version"},
+        )
+        await bond.version()
+        headers = next(iter(response.requests.values()))[0].kwargs["headers"]
+        assert "BOND-UUID" in headers
+        msg_id = headers["BOND-UUID"]
+        assert msg_id[:2] == "ff"
+        assert msg_id[2:6] == bond._session_uuid
+        assert len(msg_id) == 16
 
 
 @pytest.mark.asyncio
@@ -126,7 +174,6 @@ async def test_device_state(bond: Bond):
 async def test_turn_on(bond: Bond):
     """Tests turn_on action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {}
             return CallbackResult()
@@ -142,7 +189,6 @@ async def test_turn_on(bond: Bond):
 async def test_turn_off(bond: Bond):
     """Tests turn_off action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {}
             return CallbackResult()
@@ -158,7 +204,6 @@ async def test_turn_off(bond: Bond):
 async def test_open(bond: Bond):
     """Tests open action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {}
             return CallbackResult()
@@ -173,7 +218,6 @@ async def test_open(bond: Bond):
 async def test_tilt_open(bond: Bond):
     """Tests tilt open action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {}
             return CallbackResult()
@@ -189,7 +233,6 @@ async def test_tilt_open(bond: Bond):
 async def test_close(bond: Bond):
     """Tests close action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {}
             return CallbackResult()
@@ -205,7 +248,6 @@ async def test_close(bond: Bond):
 async def test_tilt_close(bond: Bond):
     """Tests tilt close action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {}
             return CallbackResult()
@@ -221,7 +263,6 @@ async def test_tilt_close(bond: Bond):
 async def test_hold(bond: Bond):
     """Tests hold action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {}
             return CallbackResult()
@@ -236,7 +277,6 @@ async def test_hold(bond: Bond):
 async def test_set_speed(bond: Bond):
     """Tests set_speed action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {"argument": 2}
             return CallbackResult()
@@ -252,7 +292,6 @@ async def test_set_speed(bond: Bond):
 async def test_set_speed_belief(bond: Bond):
     """Tests set_speed_belief action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {"speed": 2}
             return CallbackResult()
@@ -267,7 +306,6 @@ async def test_set_speed_belief(bond: Bond):
 async def test_set_brightness_belief(bond: Bond):
     """Tests set_brightness_belief action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {"brightness": 2}
             return CallbackResult()
@@ -282,7 +320,6 @@ async def test_set_brightness_belief(bond: Bond):
 async def test_set_power_state_belief(bond: Bond):
     """Tests set_power_state_belief action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {"power": 1}
             return CallbackResult()
@@ -297,7 +334,6 @@ async def test_set_power_state_belief(bond: Bond):
 async def test_set_light_state_belief(bond: Bond):
     """Tests set_light_state_belief action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {"light": 0}
             return CallbackResult()
@@ -312,7 +348,6 @@ async def test_set_light_state_belief(bond: Bond):
 async def test_turn_light_on(bond: Bond):
     """Tests turn_light_on action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {}
             return CallbackResult()
@@ -328,7 +363,6 @@ async def test_turn_light_on(bond: Bond):
 async def test_turn_light_off(bond: Bond):
     """Tests turn_light_off action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {}
             return CallbackResult()
@@ -344,7 +378,6 @@ async def test_turn_light_off(bond: Bond):
 async def test_set_brightness(bond: Bond):
     """Tests set_brightness action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {"argument": 50}
             return CallbackResult()
@@ -360,7 +393,6 @@ async def test_set_brightness(bond: Bond):
 async def test_set_color_temperature(bond: Bond):
     """Tests set_color_temperature action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {"argument": 3000}
             return CallbackResult()
@@ -376,7 +408,6 @@ async def test_set_color_temperature(bond: Bond):
 async def test_increase_color_temperature(bond: Bond):
     """Tests increase_color_temperature action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {"argument": 100}
             return CallbackResult()
@@ -392,7 +423,6 @@ async def test_increase_color_temperature(bond: Bond):
 async def test_decrease_color_temperature(bond: Bond):
     """Tests decrease_color_temperature action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {"argument": 100}
             return CallbackResult()
@@ -408,7 +438,6 @@ async def test_decrease_color_temperature(bond: Bond):
 async def test_set_direction_forward(bond: Bond):
     """Tests set_direction action delegates to API with correct value for forward."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {"argument": 1}
             return CallbackResult()
@@ -424,7 +453,6 @@ async def test_set_direction_forward(bond: Bond):
 async def test_set_direction_reverse(bond: Bond):
     """Tests set_direction action delegates to API with correct value for reverse."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {"argument": -1}
             return CallbackResult()
@@ -440,7 +468,6 @@ async def test_set_direction_reverse(bond: Bond):
 async def test_set_flame(bond: Bond):
     """Tests set_flame action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {"argument": 50}
             return CallbackResult()
@@ -456,7 +483,6 @@ async def test_set_flame(bond: Bond):
 async def test_set_position(bond: Bond):
     """Tests set_position action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {"argument": 50}
             return CallbackResult()
@@ -472,7 +498,6 @@ async def test_set_position(bond: Bond):
 async def test_increase_position(bond: Bond):
     """Tests increase_position action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {"argument": 50}
             return CallbackResult()
@@ -488,7 +513,6 @@ async def test_increase_position(bond: Bond):
 async def test_decrease_position(bond: Bond):
     """Tests decrease_position action delegates to API."""
     with aioresponses() as response:
-
         def callback(_url, **kwargs):
             assert kwargs.get("json") == {"argument": 50}
             return CallbackResult()
