@@ -5,6 +5,8 @@ from .bond import Bond
 from .bond_type import BondType
 from .bpup import BPUPSubscriptions, start_bpup
 from .device_type import DeviceType
+from .bond_type import BondType
+from .requestor_uuid import RequestorUUID
 
 __all__ = [
     "Bond",
@@ -14,4 +16,5 @@ __all__ = [
     "Direction",
     "DeviceType",
     "BondType",
+    "RequestorUUID",
 ]

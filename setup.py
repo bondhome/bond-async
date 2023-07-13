@@ -12,7 +12,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name="bond_async",
-    version="0.1.23",
+    version="0.2.0",
     packages=find_packages(exclude=['tests']),
 
     author="Olibra LLC",
