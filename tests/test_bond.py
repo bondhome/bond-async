@@ -87,9 +87,7 @@ async def test_version(bond: Bond):
 async def test_bond_type(bond: Bond):
     """Tests version API."""
     with aioresponses() as response:
-        response.get(
-            "http://test-host/v2/sys/version", payload={"bondid": "KSMJWCE12345"}
-        )
+        response.get("http://test-host/v2/sys/version", payload={"bondid": "KSMJWCE12345"})
         actual = await bond.bond_type()
         assert actual == BondType.SBB_CEILING_FAN
 
@@ -139,9 +137,7 @@ async def test_devices(bond: Bond):
 async def test_device(bond: Bond):
     """Tests API to get device details."""
     with aioresponses() as response:
-        response.get(
-            "http://test-host/v2/devices/device-1", payload={"some": "device details"}
-        )
+        response.get("http://test-host/v2/devices/device-1", payload={"some": "device details"})
         actual = await bond.device("device-1")
         assert actual == {"some": "device details"}
 
@@ -208,9 +204,7 @@ async def test_open(bond: Bond):
             assert kwargs.get("json") == {}
             return CallbackResult()
 
-        response.put(
-            "http://test-host/v2/devices/test-device-id/actions/Open", callback=callback
-        )
+        response.put("http://test-host/v2/devices/test-device-id/actions/Open", callback=callback)
         await bond.action("test-device-id", Action.open())
 
 
@@ -267,9 +261,7 @@ async def test_hold(bond: Bond):
             assert kwargs.get("json") == {}
             return CallbackResult()
 
-        response.put(
-            "http://test-host/v2/devices/test-device-id/actions/Hold", callback=callback
-        )
+        response.put("http://test-host/v2/devices/test-device-id/actions/Hold", callback=callback)
         await bond.action("test-device-id", Action.hold())
 
 
@@ -296,9 +288,7 @@ async def test_set_speed_belief(bond: Bond):
             assert kwargs.get("json") == {"speed": 2}
             return CallbackResult()
 
-        response.patch(
-            "http://test-host/v2/devices/test-device-id/state", callback=callback
-        )
+        response.patch("http://test-host/v2/devices/test-device-id/state", callback=callback)
         await bond.action("test-device-id", Action.set_speed_belief(2))
 
 
@@ -310,9 +300,7 @@ async def test_set_brightness_belief(bond: Bond):
             assert kwargs.get("json") == {"brightness": 2}
             return CallbackResult()
 
-        response.patch(
-            "http://test-host/v2/devices/test-device-id/state", callback=callback
-        )
+        response.patch("http://test-host/v2/devices/test-device-id/state", callback=callback)
         await bond.action("test-device-id", Action.set_brightness_belief(2))
 
 
@@ -324,9 +312,7 @@ async def test_set_power_state_belief(bond: Bond):
             assert kwargs.get("json") == {"power": 1}
             return CallbackResult()
 
-        response.patch(
-            "http://test-host/v2/devices/test-device-id/state", callback=callback
-        )
+        response.patch("http://test-host/v2/devices/test-device-id/state", callback=callback)
         await bond.action("test-device-id", Action.set_power_state_belief(True))
 
 
@@ -338,9 +324,7 @@ async def test_set_light_state_belief(bond: Bond):
             assert kwargs.get("json") == {"light": 0}
             return CallbackResult()
 
-        response.patch(
-            "http://test-host/v2/devices/test-device-id/state", callback=callback
-        )
+        response.patch("http://test-host/v2/devices/test-device-id/state", callback=callback)
         await bond.action("test-device-id", Action.set_light_state_belief(False))
 
 
@@ -522,3 +506,18 @@ async def test_decrease_position(bond: Bond):
             callback=callback,
         )
         await bond.action("test-device-id", Action.decrease_position(50))
+
+
+@pytest.mark.asyncio
+async def test_set_bluelight_brightness(bond: Bond):
+    """Tests set_bluelight_brightness action delegates to API."""
+    with aioresponses() as response:
+        def callback(_url, **kwargs):
+            assert kwargs.get("json") == {"bluelight": 50}
+            return CallbackResult()
+
+        response.patch(
+            "http://test-host/v2/bridge",
+            callback=callback,
+        )
+        await bond.set_bluelight_brightness(50)

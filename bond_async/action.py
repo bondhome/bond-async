@@ -22,6 +22,9 @@ class Action:
     SET_TIMER = "SetTimer"
     SWITCH_MODE = "SwitchMode"
     SET_STATE_BELIEF = "state"
+    HOME_SHIELD_ON = "HomeShieldOn"
+    HOME_SHIELD_OFF = "HomeShieldOff"
+    HOME_SHIELD_TOGGLE = "HomeShieldToggle"
 
     # Lights
     TURN_LIGHT_ON = "TurnLightOn"

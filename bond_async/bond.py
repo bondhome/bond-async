@@ -53,12 +53,16 @@ class Bond:
         """Return the name and location of the bridge."""
         return await self.__get("/v2/bridge")
 
+    async def set_bluelight_brightness(self, brightness: int) -> None:
+        """Set the brightness of the blue light on the bridge. Accepts values from 0 to 255."""
+        if brightness < 0 or brightness > 255:
+            raise ValueError("Brightness must be between 0 and 255")
+        await self.__patch("/v2/bridge", {"bluelight": brightness})
+
     async def devices(self) -> List[str]:
         """Return the list of available device IDs reported by API."""
         json = await self.__get("/v2/devices")
-        return [
-            key for key in json if not key.startswith("_") and type(json[key]) is dict
-        ]
+        return [key for key in json if not key.startswith("_") and isinstance(json[key], dict)]
 
     async def device(self, device_id: str) -> dict:
         """Return main device metadata reported by API."""
@@ -113,9 +117,7 @@ class Bond:
     async def groups(self) -> List[str]:
         """Return the list of available group IDs reported by API."""
         json = await self.__get("/v2/groups")
-        return [
-            key for key in json if not key.startswith("_") and type(json[key]) is dict
-        ]
+        return [key for key in json if not key.startswith("_") and type(json[key]) is dict]
 
     async def group(self, group_id: str) -> dict:
         """Return main group metadata reported by API."""
@@ -172,6 +174,30 @@ class Bond:
                 return await response.json()
 
         return await self.__call(get)
+
+    async def __patch(self, path, json) -> None:
+        async def patch(session: ClientSession) -> None:
+            self._api_kwargs["headers"]["BOND-UUID"] = self.__create_message_id()
+            async with session.patch(
+                f"http://{self._host}{path}",
+                **self._api_kwargs,
+                json=json,
+            ) as response:
+                response.raise_for_status()
+
+        await self.__call(patch)
+
+    async def __put(self, path, json) -> None:
+        async def put(session: ClientSession) -> None:
+            self._api_kwargs["headers"]["BOND-UUID"] = self.__create_message_id()
+            async with session.put(
+                f"http://{self._host}{path}",
+                **self._api_kwargs,
+                json=json,
+            ) as response:
+                response.raise_for_status()
+
+        await self.__call(put)
 
     async def __call(self, handler: Callable[[ClientSession], Any]):
         if not self._session:

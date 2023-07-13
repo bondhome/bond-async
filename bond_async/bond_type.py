@@ -3,12 +3,12 @@ from enum import Enum
 import re
 
 regexes = {
-    "bridge_snowbird": "^[A-C]\w*$",
-    "bridge_zermatt": "^Z(Z|X)\w*$",
-    "bridge_pro": "^ZP\w*$",
-    "sbb_lights": "^T\w*$",
-    "sbb_ceiling_fan": "^K\w*$",
-    "sbb_plug": "^P\w*$",
+    "bridge_snowbird": r"^[A-C]\w*$",
+    "bridge_zermatt": r"^Z(Z|X)\w*$",
+    "bridge_pro": r"^ZP\w*$",
+    "sbb_lights": r"^T\w*$",
+    "sbb_ceiling_fan": r"^K\w*$",
+    "sbb_plug": r"^P\w*$",
 }
 
 
@@ -23,33 +23,33 @@ class BondType(Enum):
     SBB_PLUG = "sbb_plug"
 
     def is_sbb(self) -> bool:
+        """Checks if BondType is a Smart by Bond product."""
         return self.value.startswith("sbb_")
 
     def is_bridge(self) -> bool:
+        """Checks if BondType is a Bond Bridge/Bond Bridge Pro."""
         return self.value.startswith("bridge_")
 
     @classmethod
     def from_serial(cls, serial: str):
         """Returns a BondType for a serial number"""
-        for type in regexes:
-            if re.search(regexes[type], serial):
-                return cls(type)
+        for (bond_type, regex) in regexes.items():
+            if re.search(regex, serial):
+                return cls(bond_type)
         return None
 
     @staticmethod
     def is_sbb_from_serial(serial: str) -> bool:
         """Checks if specified Bond serial number is a Smart by Bond product."""
-        bondType = BondType.from_serial(serial)
-        if bondType:
-            return bondType.is_sbb()
-        else:
-            return False
+        bond_type = BondType.from_serial(serial)
+        if bond_type:
+            return bond_type.is_sbb()
+        return False
 
     @staticmethod
     def is_bridge_from_serial(serial: str) -> bool:
         """Checks if specified Bond serial number is a Bond Bridge."""
-        bondType = BondType.from_serial(serial)
-        if bondType:
-            return bondType.is_bridge()
-        else:
-            return False
+        bond_type = BondType.from_serial(serial)
+        if bond_type:
+            return bond_type.is_bridge()
+        return False
