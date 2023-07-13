@@ -1,10 +1,11 @@
 """Bond BPUP wrapper."""
 
 import asyncio
-import json
 import logging
 import time
 from typing import Any, Callable, Dict, List, Optional, cast
+
+import orjson
 
 BPUP_INIT_PUSH_MESSAGE = b"\n"
 BPUP_PORT = 30007
@@ -81,8 +82,8 @@ class BPUProtocol(asyncio.Protocol):
         """Process incoming state changes."""
         _LOGGER.debug("%s: BPUP message: %s", addr, data)
         try:
-            self.bpup_subscriptions.notify(json.loads(data.decode().rstrip("\n")))
-        except json.JSONDecodeError as ex:
+            self.bpup_subscriptions.notify(orjson.loads(data.decode().rstrip("\n")))
+        except orjson.JSONDecodeError as ex:
             _LOGGER.warning(
                 "%s: Failed to process BPUP message: %s: %s", addr, data, ex
             )

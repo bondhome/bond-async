@@ -4,8 +4,9 @@ import uuid
 from typing import Any, Callable, List, Optional
 from xmlrpc.client import Boolean
 
+import orjson
 from aiohttp import ClientSession, ClientTimeout
-from aiohttp.client_exceptions import ServerDisconnectedError, ClientOSError
+from aiohttp.client_exceptions import ClientOSError, ServerDisconnectedError
 
 from bond_async.bond_type import BondType
 from .action import Action
@@ -171,7 +172,7 @@ class Bond:
                     f"http://{self._host}{path}", **self._api_kwargs
             ) as response:
                 response.raise_for_status()
-                return await response.json()
+                return await response.json(loads=orjson.loads)
 
         return await self.__call(get)
 

@@ -23,6 +23,7 @@ setup(
     keywords="bond local api async",
 
     install_requires=[
+        "orjson>=3.8.7",
         "aiohttp>=3.6.1"
     ],
 

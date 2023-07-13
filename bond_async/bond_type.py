@@ -1,6 +1,6 @@
 """Bond type enumeration."""
-from enum import Enum
 import re
+from enum import Enum
 
 regexes = {
     "bridge_snowbird": r"^[A-C]\w*$",
