@@ -77,6 +77,19 @@ class Bond:
         """Return current device state reported by API."""
         return await self.__get(f"/v2/devices/{device_id}/state")
 
+    async def device_commands(self, device_id: str) -> List[str]:
+        """Return a list of available device commands reported by API."""
+        json = await self.__get(f"/v2/devices/{device_id}/commands")
+        return [
+            key
+            for key in json
+            if not key.startswith("_") and isinstance(json[key], dict)
+        ]
+
+    async def device_command_details(self, device_id: str, command_id: str) -> dict:
+        """Return metadata about a specific command for a specific device as returned by API."""
+        return await self.__get(f"/v2/devices/{device_id}/commands/{command_id}")
+
     async def device_skeds(self, device_id: str) -> dict:
         """Return current device schedules reported by API."""
         return await self.__get(f"/v2/devices/{device_id}/skeds")
