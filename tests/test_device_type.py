@@ -28,3 +28,9 @@ def test_compare_device_types():
 
     assert DeviceType.LIGHT == "LT"
     assert DeviceType.is_light("LT")
+
+    assert DeviceType.SWITCH == "SW"
+    assert DeviceType.is_switch("SW")
+
+    assert DeviceType.HEATER == "HT"
+    assert DeviceType.is_heater("HT")
