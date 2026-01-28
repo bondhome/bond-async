@@ -12,6 +12,8 @@ class DeviceType:
     BIDET = "BD"
     LIGHT = "LT"
     GENERIC_DEVICE = "GX"
+    SWITCH = "SW"
+    HEATER = "HT"
 
     @staticmethod
     def is_fan(device_type: str) -> bool:
@@ -52,3 +54,13 @@ class DeviceType:
     def is_generic(device_type: str) -> bool:
         """Checks if specified device type is generic."""
         return device_type == DeviceType.GENERIC_DEVICE
+
+    @staticmethod
+    def is_switch(device_type: str) -> bool:
+        """Checks if specified device type is switch."""
+        return device_type == DeviceType.SWITCH
+
+    @staticmethod
+    def is_heater(device_type: str) -> bool:
+        """Checks if specified device type is heater."""
+        return device_type == DeviceType.HEATER
